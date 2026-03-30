@@ -34,13 +34,13 @@ const DEFAULT_SETTINGS: ShowHiddenFilesSettings = {
 };
 
 /** Obsidian internal directories that should never be exposed. */
-const EXCLUDED_DOTDIRS = new Set([".obsidian", ".trash"]);
+const ALWAYS_EXCLUDED = new Set([".trash"]);
 
-/** Check if the first segment of a path is a dotfile/dotfolder. */
-function isHiddenPath(path: string): boolean {
+/** Check if any segment of a path is a dotfile/dotfolder (excluding vault config dir and .trash). */
+function isHiddenPath(path: string, configDir: string): boolean {
 	const segments = path.split("/");
 	return segments.some(
-		(s) => s.startsWith(".") && !EXCLUDED_DOTDIRS.has(s),
+		(s) => s.startsWith(".") && s !== configDir && !ALWAYS_EXCLUDED.has(s),
 	);
 }
 
@@ -76,7 +76,7 @@ export default class ShowHiddenFilesPlugin extends Plugin {
 	}
 
 	onunload() {
-		this.restoreAdapter();
+		void this.restoreAdapter();
 		this.restoreDotfileWarning();
 		this.app.vault.setConfig(
 			"showUnsupportedFiles",
@@ -128,7 +128,7 @@ export default class ShowHiddenFilesPlugin extends Plugin {
 		) => {
 			if (
 				this.settings.showHiddenFiles &&
-				isHiddenPath(path)
+				isHiddenPath(path, this.app.vault.configDir)
 			) {
 				// File exists on disk — re-register it instead of deleting
 				const fullPath = adapter.getFullPath(path);
@@ -143,7 +143,7 @@ export default class ShowHiddenFilesPlugin extends Plugin {
 		};
 	}
 
-	private restoreAdapter() {
+	private async restoreAdapter(): Promise<void> {
 		if (this.originalReconcileDeletion) {
 			const adapter = this.adapter();
 			adapter.reconcileDeletion = this.originalReconcileDeletion;
@@ -151,7 +151,7 @@ export default class ShowHiddenFilesPlugin extends Plugin {
 
 			// Hide all files we previously revealed
 			for (const path of this.hiddenPaths) {
-				adapter.reconcileDeletion(adapter.getRealPath(path), path);
+				await adapter.reconcileDeletion(adapter.getRealPath(path), path);
 			}
 			this.hiddenPaths.clear();
 		}
