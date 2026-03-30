@@ -1,6 +1,6 @@
 {
   "name": "obsidian-show-hidden-files",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Obsidian plugin to show hidden dotfiles and all file types in the file explorer.",
   "main": "main.js",
   "type": "module",
