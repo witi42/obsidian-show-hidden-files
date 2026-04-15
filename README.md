@@ -1,6 +1,6 @@
 # Show Hidden Files — Obsidian Plugin
 
-Reveals hidden dotfiles (`.claude`, `.gitignore`, `.env`, `.github/`, etc.) and all file types directly in the Obsidian file explorer.
+Reveals hidden dotfiles (`.claude/`, `.gitignore`, `.env`, `.github/`, etc.) and all file types directly in the Obsidian file explorer.
 
 ## Features
 
