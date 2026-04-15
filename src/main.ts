@@ -197,7 +197,7 @@ export default class ShowHiddenFilesPlugin extends Plugin {
 			await this.hideFile(path);
 		}
 		this.hiddenPaths.clear();
-		this.restoreAdapter();
+		await this.restoreAdapter();
 		this.restoreDotfileWarning();
 	}
 
