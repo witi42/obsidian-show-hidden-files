@@ -87,11 +87,8 @@ export default class ShowHiddenFilesPlugin extends Plugin {
 	/* ── settings persistence ──────────────────────────────── */
 
 	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			await this.loadData(),
-		);
+		const loaded = (await this.loadData()) as Partial<ShowHiddenFilesSettings> | null;
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, loaded ?? {});
 	}
 
 	async saveSettings() {
@@ -204,7 +201,7 @@ export default class ShowHiddenFilesPlugin extends Plugin {
 	/* ── suppress the "bad dotfile" warning ────────────────── */
 
 	private suppressDotfileWarning() {
-		const win = self as unknown as {
+		const win = window as unknown as {
 			i18next?: { t: (...args: unknown[]) => string };
 		};
 		if (!win.i18next || this.originalI18nT) return;
@@ -222,7 +219,7 @@ export default class ShowHiddenFilesPlugin extends Plugin {
 
 	private restoreDotfileWarning() {
 		if (this.originalI18nT) {
-			const win = self as unknown as {
+			const win = window as unknown as {
 				i18next?: { t: (...args: unknown[]) => string };
 			};
 			if (win.i18next) {
