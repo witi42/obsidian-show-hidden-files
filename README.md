@@ -5,9 +5,10 @@ Reveals hidden dotfiles (`.claude/`, `.gitignore`, `.env`, `.github/`, etc.) and
 ## Features
 
 - **Show all file types** — Exposes files with unsupported extensions (`.json`, `.yml`, `.toml`, etc.) in the file explorer. Synced with Obsidian's native "Detect all file extensions" setting.
-- **Show hidden files** — Shows files and folders whose names start with a dot, which Obsidian hides by default.
+- **Show hidden files** — Shows files and folders whose names start with a dot, including hidden files inside subdirectories and normal files inside hidden folders.
+- **Ignored hidden paths** — Skip noisy or sensitive entries by exact name or vault-relative path.
 
-Both settings are **enabled by default** when the plugin is activated and **fully reverted** when the plugin is disabled.
+The display toggles are **enabled by default** when the plugin is activated and **fully reverted** when the plugin is disabled.
 
 > **Note:** Enabling this plugin exposes sensitive dotfiles (`.env`, `.git-credentials`, etc.) in the Obsidian file explorer, making them viewable, editable, and deletable. Make sure you understand what these files are before modifying them.
 
@@ -39,7 +40,17 @@ witi42/obsidian-show-hidden-files
 | Setting | Default | Description |
 |---------|---------|-------------|
 | Show all file types | On | Toggle unsupported file extensions in the explorer. Mirrors Obsidian's native "Detect all file extensions" option. |
-| Show hidden files | On | Toggle dotfiles and dotfolders in the explorer. `.obsidian` and `.trash` are always excluded. |
+| Show hidden files | On | Toggle dotfiles and dotfolders in the explorer, including nested hidden paths. `.obsidian` and `.trash` are always excluded. |
+| Ignored hidden paths | `.git`, `.hg`, `.svn`, `.DS_Store` | One exact name or vault-relative path per line. A name matches any path segment; a path matches that item and all of its children. |
+
+Examples for **Ignored hidden paths**:
+
+```text
+.git
+.DS_Store
+node_modules
+Research/.env
+```
 
 ## Building from source
 
@@ -61,7 +72,8 @@ npm run dev
 ## How it works
 
 - **Show all file types** uses Obsidian's internal `vault.setConfig('showUnsupportedFiles', …)` API to toggle the native setting programmatically.
-- **Show hidden files** intercepts the vault adapter's `reconcileDeletion` method — when Obsidian tries to hide a dotfile, the plugin re-registers it instead. A full vault rescan via `listRecursive` triggers discovery of all dotfiles on startup.
+- **Show hidden files** intercepts the vault adapter's `reconcileDeletion` method — when Obsidian tries to hide a dotfile, the plugin re-registers it instead. The plugin also scans the vault filesystem recursively so hidden paths inside subdirectories are discovered on startup.
+- **Ignored hidden paths** are checked before registration. Ignored folders are not scanned, so large folders such as `.git` stay out of the file explorer.
 - On disable, both settings are restored to their previous values and all revealed dotfiles are hidden again.
 
 ## Compatibility
